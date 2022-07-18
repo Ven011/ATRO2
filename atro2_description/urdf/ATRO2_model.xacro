@@ -1,0 +1,168 @@
+<?xml version="1.0" ?>
+<robot name="ATRO2_model" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <link name="base_link">
+  <xacro:include filename="$(find atro2_description)/urdf/materials.xacro" />
+  <xacro:include filename="$(find atro2_description)/urdf/ATRO2_model.trans" />
+  <xacro:include filename="$(find atro2_description)/urdf/ATRO2_model.gazebo" />
+    <inertial>
+      <origin xyz="0.00021942589051527798 -8.961847857435687e-06 0.05531572461065001" rpy="0 0 0"/>
+      <mass value="2.1494931274835305"/>
+      <inertia ixx="0.002182" iyy="0.004578" izz="0.004879" ixy="1e-06" iyz="1e-06" ixz="-2e-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://atro2_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://atro2_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="front_left_wheel__1__1">
+    <inertial>
+      <origin xyz="1.5827738644030864e-07 0.01563385253415052 3.3608041528215837e-07" rpy="0 0 0"/>
+      <mass value="0.04751471324293791"/>
+      <inertia ixx="1.6e-05" iyy="2.9e-05" izz="1.6e-05" ixy="0.0" iyz="0.0" ixz="0.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.05075 -0.03925 -0.0335" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://atro2_description/meshes/front_left_wheel__1__1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="-0.05075 -0.03925 -0.0335" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://atro2_description/meshes/front_left_wheel__1__1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="back_left_wheel_1">
+    <inertial>
+      <origin xyz="1.582773865929643e-07 0.015633852534150054 3.3608041487276363e-07" rpy="0 0 0"/>
+      <mass value="0.04751471324293791"/>
+      <inertia ixx="1.6e-05" iyy="2.9e-05" izz="1.6e-05" ixy="0.0" iyz="0.0" ixz="-0.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.05075 -0.03925 -0.0335" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://atro2_description/meshes/back_left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="0.05075 -0.03925 -0.0335" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://atro2_description/meshes/back_left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="back_right_wheel_1">
+    <inertial>
+      <origin xyz="1.582773784120084e-07 -0.015633989541450066 3.36080365537228e-07" rpy="0 0 0"/>
+      <mass value="0.0475147132429379"/>
+      <inertia ixx="1.6e-05" iyy="2.9e-05" izz="1.6e-05" ixy="0.0" iyz="0.0" ixz="0.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.05075 0.03925 -0.0335" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://atro2_description/meshes/back_right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="0.05075 0.03925 -0.0335" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://atro2_description/meshes/back_right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="front_right_wheel_1">
+    <inertial>
+      <origin xyz="1.5827737812057485e-07 -0.015633989541450066 3.3608036566212807e-07" rpy="0 0 0"/>
+      <mass value="0.04751471324293792"/>
+      <inertia ixx="1.6e-05" iyy="2.9e-05" izz="1.6e-05" ixy="0.0" iyz="0.0" ixz="0.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.05075 0.03925 -0.0335" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://atro2_description/meshes/front_right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="-0.05075 0.03925 -0.0335" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://atro2_description/meshes/front_right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="camera_1">
+    <inertial>
+      <origin xyz="1.5827738633622523e-07 0.004349931496348426 3.3608041305477343e-07" rpy="0 0 0"/>
+      <mass value="0.0004412727000000003"/>
+      <inertia ixx="0.0" iyy="0.0" izz="0.0" ixy="-0.0" iyz="-0.0" ixz="-0.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0745 0.00435 -0.1271" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://atro2_description/meshes/camera_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="-0.0745 0.00435 -0.1271" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://atro2_description/meshes/camera_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Rev1" type="continuous">
+    <origin xyz="0.05075 0.03925 0.0335" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="front_left_wheel__1__1"/>
+    <axis xyz="0.0 -1.0 -0.0"/>
+  </joint>
+
+  <joint name="Rev2" type="continuous">
+    <origin xyz="-0.05075 0.03925 0.0335" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="back_left_wheel_1"/>
+    <axis xyz="0.0 -1.0 -0.0"/>
+  </joint>
+
+  <joint name="Rev3" type="continuous">
+    <origin xyz="-0.05075 -0.03925 0.0335" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="back_right_wheel_1"/>
+    <axis xyz="0.0 1.0 0.0"/>
+  </joint>
+
+  <joint name="Rev4" type="continuous">
+    <origin xyz="0.05075 -0.03925 0.0335" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="front_right_wheel_1"/>
+    <axis xyz="0.0 1.0 0.0"/>
+  </joint>
+
+  <joint name="Rev7" type="continuous">
+    <origin xyz="0.0745 -0.00435 0.1271" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="camera_1"/>
+    <axis xyz="-0.0 1.0 0.0"/>
+  </joint>
+
+</robot>

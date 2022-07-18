@@ -1,0 +1,21 @@
+<launch>
+  <arg name="gui" default="true"/>
+  <arg name="rvizconfig" default="$(find atro2_simulator)/launch/urdf.rviz"/>
+
+  <!-- Tell the joint state publisher whether it should use GUI -->
+  <param name="use_gui" value="$(arg gui)"/>
+  <param name="robot_description" command="$(find xacro)/xacro $(find atro2_description)/urdf/ATRO2_model.xacro"/>
+  <!-- <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model ATRO2_model"/> -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+  <node name="rviz" pkg="rviz" args="-d $(arg rvizconfig)" type="rviz" required="false"/>
+
+  <!-- <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="true"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include> -->
+
+</launch>
