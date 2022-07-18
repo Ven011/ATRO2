@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="atro2_control" type="atro2_man.py" name="manual_ATRO" output="screen"></node>
+</launch>
