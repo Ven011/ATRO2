@@ -9,7 +9,6 @@ from pynput import keyboard
 
 def main():
 	rospy.init_node("manual_ATRO")
-	
 	cmd_pub = rospy.Publisher("move_cmds", String, queue_size=1)
 	cmd = String()
 
