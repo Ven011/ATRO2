@@ -12,7 +12,7 @@ from sensor_msgs.msg import Image
 
 def main():
     # camera capture object
-    cam = cv2.VideoCapture(0) # TODO: Change when on raspberry pi. Add cv2.CAP_V4L2
+    cam = cv2.VideoCapture("/dev/video0", cv2.CAP_V4L2)
     # camera bridge
     bridge = CvBridge()
 
