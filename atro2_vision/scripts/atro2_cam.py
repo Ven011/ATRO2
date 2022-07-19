@@ -42,7 +42,7 @@ def main():
         if rospy.is_shutdown():    
             cam.release()
 
-        sleep(1)
+        sleep(2)
 
 if __name__ == "__main__":
     try: 
