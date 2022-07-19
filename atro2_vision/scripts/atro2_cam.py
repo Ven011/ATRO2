@@ -5,6 +5,7 @@
     captured frames to other nodes.
 """
 
+from time import sleep
 import cv2
 import rospy
 from cv_bridge import CvBridge
@@ -20,7 +21,6 @@ def main():
     rospy.init_node("image")
     # create image publisher
     img_pub = rospy.Publisher("/camera", Image, queue_size=1)
-    rate = rospy.Rate(10)
 
     while not rospy.is_shutdown():
         ret, frame = cam.read()
@@ -28,7 +28,7 @@ def main():
             break   # break out of the loop if we didn't capture an image
 
         # resize and flip the frame
-        frame = cv2.resize(frame, (600, 600))
+        frame = cv2.resize(frame, (300, 300))
         frame = cv2.flip(frame, 0)
 
         # create out topic message using the bridge
@@ -41,6 +41,8 @@ def main():
 
         if rospy.is_shutdown():    
             cam.release()
+
+        sleep(1)
 
 if __name__ == "__main__":
     try: 
