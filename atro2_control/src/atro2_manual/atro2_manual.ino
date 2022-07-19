@@ -1,5 +1,5 @@
 #include <ros.h>
-#include <std_msgs/Char.h>
+#include <std_msgs/String.h>
 
 // motor control pins
 #define LR_EN 8
@@ -19,11 +19,11 @@
 #define RIGHT 3
 #define HALT 4
 
-void move(int dir);
+void move_robot(int dir);
 void manual_control();
-void msg_cb(const std_msgs::Char &msg);
+void msg_cb(const std_msgs::String &msg);
 
-int speed = 50;
+int ang_speed = 50;
 int speed_delta = 5;
 volatile char command = 'h';  // start stopped
 
@@ -31,10 +31,14 @@ volatile char command = 'h';  // start stopped
 ros::NodeHandle nh;
 
 // create a subscriber
-ros::Subscriber<std_msgs::Char> pi_sub("/move_cmds", &msg_cb);
+ros::Subscriber<std_msgs::String> pi_sub("/move_cmds", &msg_cb);
 
 void setup()
 {
+  // initialize the node
+  nh.initNode();
+  nh.subscribe(pi_sub);
+  
   pinMode(RR_EN, OUTPUT);
   pinMode(RL_EN, OUTPUT);
   pinMode(LR_EN, OUTPUT);
@@ -62,55 +66,55 @@ void manual_control()
   switch(command)
   {
     case 'f':
-      move(FORWARD);
+      move_robot(FORWARD);
       break;
     case 'b':
-      move(BACKWARD);
+      move_robot(BACKWARD);
       break;
     case 'l':
-      move(LEFT);
+      move_robot(LEFT);
       break;
     case 'r':
-      move(RIGHT);
+      move_robot(RIGHT);
       break;
     case 'h':
-      move(HALT);
+      move_robot(HALT);
       break;
     case 'I':
-      if(speed + speed_delta < 255){speed += speed_delta;}
+      if(ang_speed + speed_delta < 255){ang_speed += speed_delta;}
       break;
     case 'D':
-      if(speed - speed_delta > 0){speed -= speed_delta;}
+      if(ang_speed - speed_delta > 0){ang_speed -= speed_delta;}
       break;
   }
 }
 
-void move(int dir)
+void move_robot(int dir)
 {
   switch(dir)
   {
     case 0:
-      analogWrite(RR_PWM, speed);
+      analogWrite(RR_PWM, ang_speed);
       analogWrite(RL_PWM, 0);
-      analogWrite(LR_PWM, speed);
+      analogWrite(LR_PWM, ang_speed);
       analogWrite(LL_PWM, 0);
       break;
     case 1: 
       analogWrite(RR_PWM, 0);
-      analogWrite(RL_PWM, speed);
+      analogWrite(RL_PWM, ang_speed);
       analogWrite(LR_PWM, 0);
-      analogWrite(LL_PWM, speed);
+      analogWrite(LL_PWM, ang_speed);
       break;
     case 2:
-      analogWrite(RR_PWM, speed);
+      analogWrite(RR_PWM, ang_speed);
       analogWrite(RL_PWM, 0);
       analogWrite(LR_PWM, 0);
-      analogWrite(LL_PWM, speed);
+      analogWrite(LL_PWM, ang_speed);
       break;
     case 3: 
       analogWrite(RR_PWM, 0);
-      analogWrite(RL_PWM, speed);
-      analogWrite(LR_PWM, speed);
+      analogWrite(RL_PWM, ang_speed);
+      analogWrite(LR_PWM, ang_speed);
       analogWrite(LL_PWM, 0);
       break;
     case 4:
@@ -122,7 +126,7 @@ void move(int dir)
   }
 }
 
-void msg_cb(const std_msgs::Char &msg)
+void msg_cb(const std_msgs::String &msg)
 {
-  command = msg.data;
+  command = msg.data[0];
 }
