@@ -5,6 +5,7 @@
     a lane of tape. 
 """
 
+from time import monotonic
 import rospy
 import cv2
 import math
@@ -12,7 +13,6 @@ import copy
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
-from time import monotonic
 
 class Line_follower:
 
@@ -28,7 +28,8 @@ class Line_follower:
         self._threshold2 = 85
 
     def line_detection(self, image):
-	s_time = monotonic()
+        s_time = monotonic()
+        
         # create and apply mask on image to isolate tape by turning all pixels not considered tape black
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, self._low_blue, self._high_blue)
@@ -55,7 +56,8 @@ class Line_follower:
                 x1, y1, x2, y2 = line[0]
                 cv2.line(image, (x1, y1), (x2, y2), (255, 255, 255), 2)
 
-	print(monotonic() - s_time)
+        print(monotonic() - s_time)
+
         cv2.imshow("Image", image)
         cv2.waitKey(1)
 
