@@ -20,7 +20,7 @@ def main():
     # create node
     rospy.init_node("image")
     # create image publisher
-    img_pub = rospy.Publisher("/camera", Image, queue_size=1)
+    img_pub = rospy.Publisher("/camera", Image)
 
     while not rospy.is_shutdown():
         ret, frame = cam.read()
@@ -36,13 +36,8 @@ def main():
         # publish the message
         img_pub.publish(msg)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
         if rospy.is_shutdown():    
             cam.release()
-
-        sleep(2)
 
 if __name__ == "__main__":
     try: 
