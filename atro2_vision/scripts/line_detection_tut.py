@@ -17,7 +17,7 @@ hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     # extract a mask
 mask = cv2.inRange(hsv, low_blue, high_blue)
 
-# cv2.imshow("Masked image", mask)
+cv2.imshow("Masked image", mask)
 
 # turn all pixels that are not considered tape black
 for row in range(image.shape[0]):

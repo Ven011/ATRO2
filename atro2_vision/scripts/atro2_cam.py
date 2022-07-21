@@ -36,9 +36,6 @@ def main():
         # publish the message
         img_pub.publish(msg)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
         if rospy.is_shutdown():    
             cam.release()
 
