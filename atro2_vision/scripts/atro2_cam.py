@@ -21,7 +21,7 @@ def main():
     rospy.init_node("image")
     # create image publisher
     img_pub = rospy.Publisher("/camera", Image)
-    rate = rospy.Rate(1)
+    rate = rospy.Rate(10)
 
     while not rospy.is_shutdown():
         ret, frame = cam.read()
