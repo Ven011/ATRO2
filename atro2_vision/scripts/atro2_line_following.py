@@ -17,7 +17,7 @@ class Line_follower:
 
     def __init__(self):
         self.bridge = CvBridge()
-        self.img_sub = rospy.Subscriber("/camera", Image, self.img_callback, queue_size=1)
+        self.img_sub = rospy.Subscriber("/camera", Image, self.img_callback)
         
         self._low_blue = np.array([60, 70, 0])
         self._high_blue = np.array([207, 161, 146])
