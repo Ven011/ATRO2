@@ -31,6 +31,8 @@ def main():
 			cmd.data = 'f'
 		if k == 'down':
 			cmd.data = 'b'
+		if k == 'pause':
+			cmd.data = 'h'
 		if k == 'home':
 			cmd.data = 'I'
 		if k == 'end':
@@ -47,8 +49,8 @@ def main():
 		except AttributeError:
 			k = key.name
 
-		if k == 'left' or k == 'right' or k == 'up' or k == 'down':
-			cmd.data = 'h'
+		if k == 'home' or k == 'end':
+			cmd.data = '_'
 
 		cmd_pub.publish(cmd)
 
@@ -59,5 +61,8 @@ def main():
 	rospy.spin()
 
 if __name__ == "__main__":
-	main()
+	try:
+		main()
+	except rospy.ROSInterruptException:
+		pass
 

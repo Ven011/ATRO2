@@ -13,11 +13,10 @@
 #define RL_PWM 3
 
 // direction variables
-#define FORWARD 0
-#define BACKWARD 1
-#define LEFT 2
-#define RIGHT 3
-#define HALT 4
+enum DIR
+{
+  FORWARD = 0, BACKWARD, LEFT, RIGHT, HALT
+};
 
 void move_robot(int dir);
 void manual_control();
@@ -86,6 +85,8 @@ void manual_control()
     case 'D':
       if(ang_speed - speed_delta > 0){ang_speed -= speed_delta;}
       break;
+    default:
+      break;
   }
 }
 
@@ -122,6 +123,8 @@ void move_robot(int dir)
       analogWrite(RL_PWM, 0);
       analogWrite(LR_PWM, 0);
       analogWrite(LL_PWM, 0);
+      break;
+    default:
       break;
   }
 }
