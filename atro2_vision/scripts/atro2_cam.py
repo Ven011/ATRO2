@@ -20,7 +20,7 @@ def main():
     # create node
     rospy.init_node("image")
     # create image publisher
-    img_pub = rospy.Publisher("/camera", Image, queue_size=1)
+    img_pub = rospy.Publisher("/camera", Image)
 
     while not rospy.is_shutdown():
         ret, frame = cam.read()
@@ -38,8 +38,6 @@ def main():
 
         if rospy.is_shutdown():    
             cam.release()
-
-        sleep(2)
 
 if __name__ == "__main__":
     try: 
