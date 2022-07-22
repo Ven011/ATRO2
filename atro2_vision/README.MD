@@ -7,3 +7,19 @@
     - In terminal, type:
         rqt_image_view
         - And select the topic that contrains the image message
+
+- When creating a service message, you can use any rosmsg (std_msgs, sensor_msgs, etc.)
+    - Just make sure to add the package in the CMakeLists find package function:
+        find_package(catkin REQUIRED COMPONENTS
+            roscpp
+            rospy
+            std_msgs
+            sensor_msgs
+            message_generation
+        )
+    - and the message generation function:
+        generate_messages(
+            DEPENDENCIES
+            std_msgs  # Or other packages containing msgs
+            sensor_msgs
+        )

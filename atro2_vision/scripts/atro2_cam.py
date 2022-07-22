@@ -1,49 +1,43 @@
 #! /usr/bin/python3
 
 """
-    This script creates and publishes a camera topic that provides
-    captured frames to other nodes.
+    This script operates an image service that provides
+    captured frames to other nodes when requested
 """
 
-from time import sleep
 import cv2
 import rospy
 from cv_bridge import CvBridge
-from sensor_msgs.msg import Image
+from atro2_vision.srv import getImage, getImageResponse
 
-def main():
-    # camera capture object
-    cam = cv2.VideoCapture("/dev/video0", cv2.CAP_V4L2)
-    # camera bridge
-    bridge = CvBridge()
+class Image_srv:
+    def __init__(self):
+        # service node
+        rospy.init_node("image_srv")
 
-    # create node
-    rospy.init_node("image")
-    # create image publisher
-    img_pub = rospy.Publisher("/camera", Image)
-    rate = rospy.Rate(10)
+        # image capture object
+        self.cap = cv2.VideoCapture("/dev/video0", cv2.CAP_V4L2)
 
-    while not rospy.is_shutdown():
-        ret, frame = cam.read()
-        if not ret: 
-            break   # break out of the loop if we didn't capture an image
+        # service server
+        s = rospy.Service("/image_srv/get_image", getImage, self.img_srv_callback)
 
-        # resize and flip the frame
-        frame = cv2.resize(frame, (300, 300))
-        frame = cv2.flip(frame, 0)
+        self.bridge = CvBridge()
 
-        # create out topic message using the bridge
-        msg = bridge.cv2_to_imgmsg(frame, "bgr8")
-        # publish the message
-        img_pub.publish(msg)
+    def __del__(self):
+        self.cap.release()
 
-        if rospy.is_shutdown():    
-            cam.release()
-
-        rate.sleep()
+    def img_srv_callback(self, req):
+        # capture and return image
+        ret, img = self.cap.read()
+        img = cv2.resize(img, (300, 300))
+        img = cv2.flip(img, 0)
+        ros_img = self.bridge.cv2_to_imgmsg(img, 'bgr8')
+        return getImageResponse(ros_img)
 
 if __name__ == "__main__":
     try: 
-        main()
+        img_srv = Image_srv()
+        rospy.spin()
+        del img_srv
     except rospy.ROSInterruptException:
         pass

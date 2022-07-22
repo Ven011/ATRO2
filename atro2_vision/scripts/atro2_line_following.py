@@ -13,12 +13,12 @@ import copy
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
+from atro2_vision.srv import getImage
 
 class Line_follower:
 
     def __init__(self):
         self.bridge = CvBridge()
-        self.img_sub = rospy.Subscriber("/camera", Image, self.img_callback, queue_size=1)
         
         self._low_blue = np.array([60, 70, 0])
         self._high_blue = np.array([207, 161, 146])
@@ -28,8 +28,7 @@ class Line_follower:
         self._threshold2 = 85
 
     def line_detection(self, image):
-        s_time = monotonic()
-        
+        # Processing time is about 1 second
         # create and apply mask on image to isolate tape by turning all pixels not considered tape black
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, self._low_blue, self._high_blue)
@@ -56,32 +55,35 @@ class Line_follower:
                 x1, y1, x2, y2 = line[0]
                 cv2.line(image, (x1, y1), (x2, y2), (255, 255, 255), 2)
 
-        print(monotonic() - s_time)
+        return image
 
-        cv2.imshow("Image", image)
+    def show_results(self, ros_img):
+        cv2_img = copy.deepcopy(ros_img)
+        cv2_img = self.bridge.imgmsg_to_cv2(cv2_img, "bgr8")
+
+        processed_img = self.line_detection(cv2_img)
+
+        cv2.imshow("image", processed_img)
         cv2.waitKey(1)
-
-
-    def img_callback(self, img_msg):
-        try:
-            image = self.bridge.imgmsg_to_cv2(img_msg, desired_encoding="passthrough")
-        except CvBridgeError as e:
-            print(e)
-
-        img = copy.deepcopy(image)
-        self.line_detection(img)
-
-
 
 def main():
     lf = Line_follower()
-    
     # create node
     rospy.init_node("line_following")
-    try:
-        rospy.spin()
-    except KeyboardInterrupt:
-        print("Shutting down...")
+    # wait for the get_image service to become available
+    rospy.wait_for_service("/image_srv/get_image")
+
+    while not rospy.is_shutdown():
+        # request an image and show the results after processing
+        try:
+            # create a service call proxy: Its used to make a call to the service
+            srv_call = rospy.ServiceProxy("/image_srv/get_image", getImage)
+            # make a call to the service with the given arguments and take the response
+            srv_resp = srv_call(True)
+            # get the image from the response and show the results after processing
+            lf.show_results(srv_resp.cap_image)
+        except rospy.ServiceException:
+            print("Service call failed")
 
     cv2.destroyAllWindows()
 

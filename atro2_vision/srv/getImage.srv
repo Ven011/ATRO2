@@ -1,0 +1,3 @@
+bool img
+---
+sensor_msgs/Image cap_image 
