@@ -28,7 +28,7 @@ class Line_follower:
         self._threshold2 = 85
 
     def line_detection(self, image):
-        # Processing time is about 1 second
+        s_time = monotonic()
         # create and apply mask on image to isolate tape by turning all pixels not considered tape black
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, self._low_blue, self._high_blue)
@@ -54,6 +54,8 @@ class Line_follower:
             for line in lines:
                 x1, y1, x2, y2 = line[0]
                 cv2.line(image, (x1, y1), (x2, y2), (255, 255, 255), 2)
+
+        print("Processing time: {} sec".format(round(monotonic() - s_time, 5)))
 
         return image
 
