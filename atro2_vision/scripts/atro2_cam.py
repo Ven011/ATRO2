@@ -29,7 +29,7 @@ class Image_srv:
     def img_srv_callback(self, req):
         # capture and return image
         ret, img = self.cap.read()
-        img = cv2.resize(img, (300, 300))
+        img = cv2.resize(img, (100, 100))
         img = cv2.flip(img, 0)
         ros_img = self.bridge.cv2_to_imgmsg(img, 'bgr8')
         return getImageResponse(ros_img)
