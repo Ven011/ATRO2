@@ -47,7 +47,7 @@ class Line_follower:
         edged = cv2.Canny(blurred, self._threshold1, self._threshold2)
 
         # use the probabilistic hough transform to extract lines from the image
-        lines = cv2.HoughLinesP(edged, 1, np.pi/180, 10, minLineLength=9, maxLineGap=1)
+        lines = cv2.HoughLinesP(edged, 1, np.pi/180, 10, minLineLength=30, maxLineGap=5)
 
         # draw the lines on the image
         if lines is not None:
@@ -64,7 +64,6 @@ class Line_follower:
         cv2_img = self.bridge.imgmsg_to_cv2(cv2_img, "bgr8")
 
         processed_img = self.line_detection(cv2_img)
-        processed_img = cv2.resize(processed_img, (400, 400))
 
         cv2.imshow("image", processed_img)
         cv2.waitKey(1)
