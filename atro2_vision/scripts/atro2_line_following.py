@@ -6,7 +6,6 @@
 """
 
 from time import monotonic
-from turtle import numinput
 import rospy
 import cv2
 import math
@@ -14,6 +13,7 @@ import copy
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
+from std_msgs.msg import String
 from atro2_vision.srv import getImage
 
 class Line_follower:
@@ -27,6 +27,12 @@ class Line_follower:
         self._k_height = 5
         self._threshold1 = 80
         self._threshold2 = 85
+
+        self.turn_offset = 0.3  # offset used to determine whether we should turn left or right
+        self.inv_turn = False
+        # turning control topic publisher
+        self.cmd_pub = rospy.Publisher("move_cmds", String, queue_size=1)
+        self.cmd_msg = String()
 
     def line_detection(self, image):
         s_time = monotonic()
@@ -77,6 +83,18 @@ class Line_follower:
 
         return avg_slope, (monotonic() - s_time)
 
+    def control(self, avg_slope):
+        if avg_slope < -self.turn_offset:
+            self.cmd_msg.data = "l" if not self.inv_turn else "r"
+        elif avg_slope > self.turn_offset:
+            self.cmd_msg.data = "r" if not self.inv_turn else "l"
+        else:
+            self.cmd_msg.data = "f"
+
+        print("Cmd: {}".format(self.cmd_msg.data))
+
+        self.cmd_pub.publish(self.cmd_msg)
+
     def show_results(self, ros_img):
         cv2_img = copy.deepcopy(ros_img)
         cv2_img = self.bridge.imgmsg_to_cv2(cv2_img, "bgr8")
@@ -84,6 +102,7 @@ class Line_follower:
         detected_lines, image, ld_p_time = self.line_detection(cv2_img)
         marked_img, lv_p_time = self.viz_lines(detected_lines, image)
         average_slope, as_p_time = self.avg_slope(detected_lines)
+        self.control(average_slope)
 
         print("Total processing time: {},   Average_slope: {}".format((ld_p_time + lv_p_time + as_p_time), average_slope))
 
