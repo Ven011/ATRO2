@@ -6,6 +6,7 @@
 """
 
 from time import monotonic
+from turtle import numinput
 import rospy
 import cv2
 import math
@@ -49,23 +50,44 @@ class Line_follower:
         # use the probabilistic hough transform to extract lines from the image
         lines = cv2.HoughLinesP(edged, 1, np.pi/180, 20, minLineLength=15, maxLineGap=5)
 
+        return lines, image, (monotonic() - s_time)
+
+    def viz_lines(self, lines, image):
+        s_time = monotonic()
         # draw the lines on the image
         if lines is not None:
             for line in lines:
                 x1, y1, x2, y2 = line[0]
                 cv2.line(image, (x1, y1), (x2, y2), (255, 255, 255), 2)
 
-        print("Processing time: {} sec".format(round(monotonic() - s_time, 5)))
+        return image, (monotonic() - s_time)
 
-        return image
+    def avg_slope(self, lines):
+        s_time = monotonic()
+        # determine the slope of each line and calculate the average slope
+        total_m = 0
+        num_lines = 0
+        if lines is not None:
+            for line in lines:
+                num_lines += 1
+                x1, y1, x2, y2 = line[0]
+                total_m += (y1 - y2) / (x1 - x2)
+
+        avg_slope = (total_m/num_lines) if num_lines != 0 else 0
+
+        return avg_slope, (monotonic() - s_time)
 
     def show_results(self, ros_img):
         cv2_img = copy.deepcopy(ros_img)
         cv2_img = self.bridge.imgmsg_to_cv2(cv2_img, "bgr8")
 
-        processed_img = self.line_detection(cv2_img)
+        detected_lines, image, ld_p_time = self.line_detection(cv2_img)
+        marked_img, lv_p_time = self.viz_lines(detected_lines, image)
+        average_slope, as_p_time = self.avg_slope(detected_lines)
 
-        cv2.imshow("image", processed_img)
+        print("Total processing time: {},   Average_slope: {}".format((ld_p_time + lv_p_time + as_p_time), average_slope))
+
+        cv2.imshow("image", marked_img)
         cv2.waitKey(1)
 
 def main():
