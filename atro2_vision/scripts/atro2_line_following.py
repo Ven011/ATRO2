@@ -118,7 +118,7 @@ class Line_follower:
             elif r_white_px:
                 point[0] = point[0] + r_white_px
             else:
-                point[0] = path[path_idx - 1] if path_idx > 1 and path_idx != len(path) else point[0]
+                point[0] = path[path_idx - 1][0] if path_idx > 1 and path_idx != len(path) else point[0]
 
             cv2.circle(image, (point[0], point[1]), 1, (0, 0, 255), 1)
 
