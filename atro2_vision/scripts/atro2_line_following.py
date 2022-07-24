@@ -44,6 +44,8 @@ class Line_follower:
                 if not mask[row, col]:
                     image[row, col] = [0, 0, 0]
 
+        cv2.imshow("mask", mask)
+
         # turn the image into a gray scale image
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -57,6 +59,56 @@ class Line_follower:
         lines = cv2.HoughLinesP(edged, 1, np.pi/180, 20, minLineLength=15, maxLineGap=5)
 
         return lines, image, (monotonic() - s_time)
+
+    def line_point_detection(self, image):
+        s_time = monotonic()
+        # Mask the image to isolate the tape
+        low_blue = np.array([60, 70, 0])
+        high_blue = np.array([207, 161, 146])
+            # convert BGR image to HSV image
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+            # extract a mask
+        mask = cv2.inRange(hsv, low_blue, high_blue)
+
+        # create a path array - stores the points of the center path between the lanes
+        path_interval = 1  # path resolution in pixels
+
+            # append the path array with the points of a line that vertically spans the center of the image
+        o_px = image.shape[1] // 2  # origint point coords. bottom center pixel of the image
+        o_py = image.shape[0]
+        path = [[o_px, y] for y in range(o_py, 0, -path_interval)]
+
+        # set each point in the path to the coordinate of the pixel that is in the middle of two
+        # white "pixels" that share a row with the point in the mask image. If there is no white pixel,
+        # keep the original point.
+        for point in path:
+            p_row = mask[point[1] - 1]  # subtract one bc indexing starts at 0
+            # get the row of pixels left of the point
+            l_row = p_row[:len(p_row)//2]   # * could be problematic if the image size is odd
+            # get the row of pxls right
+            r_row = p_row[len(p_row)//2:]
+
+            # flip the l_row array
+            l_row = l_row[::-1]
+
+            # find the index of the first occurence of a 255 in the l and r rows.
+            l_white_px = 0
+            r_white_px = 0
+            for idx in range(len(l_row) - 1):
+                if l_row[idx]:
+                    l_white_px = idx
+                    break
+
+            for idx in range(len(r_row) - 1):
+                if r_row[idx]:
+                    r_white_px = idx
+                    break
+
+            if point[0] != point[0] - l_white_px and point[0] != point[0] + r_white_px:
+                cv2.circle(image, (point[0] - l_white_px, point[1]), 1, (255, 255, 255), 1)
+                cv2.circle(image, (point[0] + r_white_px, point[1]), 1, (255, 255, 255), 1)
+
+        return image, (monotonic() - s_time)
 
     def viz_lines(self, lines, image):
         s_time = monotonic()
@@ -99,12 +151,13 @@ class Line_follower:
         cv2_img = copy.deepcopy(ros_img)
         cv2_img = self.bridge.imgmsg_to_cv2(cv2_img, "bgr8")
 
-        detected_lines, image, ld_p_time = self.line_detection(cv2_img)
-        marked_img, lv_p_time = self.viz_lines(detected_lines, image)
-        average_slope, as_p_time = self.avg_slope(detected_lines)
-        self.control(average_slope)
+        # detected_lines, image, ld_p_time = self.line_detection(cv2_img)
+        # marked_img, lv_p_time = self.viz_lines(detected_lines, image)
+        # average_slope, as_p_time = self.avg_slope(detected_lines)
+        # self.control(average_slope)
+        # print("Total processing time: {},   Average_slope: {}".format((ld_p_time + lv_p_time + as_p_time), average_slope))
 
-        print("Total processing time: {},   Average_slope: {}".format((ld_p_time + lv_p_time + as_p_time), average_slope))
+        marked_img = self.line_point_detection(cv2_img)
 
         cv2.imshow("image", marked_img)
         cv2.waitKey(1)
