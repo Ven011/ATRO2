@@ -114,9 +114,9 @@ class Line_follower:
             if l_white_px and r_white_px:    
                 point[0] = ((point[0] - l_white_px) + (point[0] + r_white_px)) // 2
             elif l_white_px:
-                point[0] = point[0] - l_white_px
+                point[0] = point[0] + l_white_px
             elif r_white_px:
-                point[0] = point[0] + r_white_px
+                point[0] = point[0] - r_white_px
             else:
                 point[0] = path[path_idx - 1][0] if path_idx > 1 and path_idx != len(path) else point[0]
 
