@@ -81,7 +81,9 @@ class Line_follower:
         # set each point in the path to the coordinate of the pixel that is in the middle of two
         # white "pixels" that share a row with the point in the mask image. If there is no white pixel,
         # keep the original point.
+        path_idx = 0
         for point in path:
+            path_idx += 1
             p_row = mask[point[1] - 1]  # subtract one bc indexing starts at 0
             # get the row of pixels left of the point
             l_row = p_row[:len(p_row)//2]   # * could be problematic if the image size is odd
@@ -105,11 +107,20 @@ class Line_follower:
                     break
 
             # assume equal lane width if the left or right lane is not detected
-            l_white_px = r_white_px if not l_white_px and r_white_px else l_white_px
-            r_white_px = l_white_px if not r_white_px and l_white_px else r_white_px
+            # l_white_px = r_white_px if not l_white_px and r_white_px else l_white_px
+            # r_white_px = l_white_px if not r_white_px and l_white_px else r_white_px
 
             # calculate the mid-point
-            point[0] = ((point[0] - l_white_px) + (point[0] + r_white_px)) // 2
+            if l_white_px and r_white_px:    
+                point[0] = ((point[0] - l_white_px) + (point[0] + r_white_px)) // 2
+            elif l_white_px:
+                point[0] = point[0] - l_white_px
+            elif r_white_px:
+                point[0] = point[0] + r_white_px
+            else:
+                point[0] = path[path_idx - 1] if path_idx > 1 and path_idx != len(path) else point[0]
+
+            cv2.circle(image, (point[0], point[1]), 1, (0, 0, 255), 1)
 
             if point[0] != point[0] - l_white_px and point[0] != point[0] + r_white_px:
                 cv2.circle(image, (point[0] - l_white_px, point[1]), 1, (255, 255, 255), 1)
