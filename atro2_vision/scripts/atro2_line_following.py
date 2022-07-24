@@ -104,6 +104,13 @@ class Line_follower:
                     r_white_px = idx
                     break
 
+            # assume equal lane width if the left or right lane is not detected
+            l_white_px = r_white_px if not l_white_px and r_white_px else l_white_px
+            r_white_px = l_white_px if not r_white_px and l_white_px else r_white_px
+
+            # calculate the mid-point
+            point[0] = ((point[0] - l_white_px) + (point[0] + r_white_px)) // 2
+
             if point[0] != point[0] - l_white_px and point[0] != point[0] + r_white_px:
                 cv2.circle(image, (point[0] - l_white_px, point[1]), 1, (255, 255, 255), 1)
                 cv2.circle(image, (point[0] + r_white_px, point[1]), 1, (255, 255, 255), 1)
