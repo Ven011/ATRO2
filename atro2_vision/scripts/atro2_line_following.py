@@ -157,7 +157,9 @@ class Line_follower:
         # self.control(average_slope)
         # print("Total processing time: {},   Average_slope: {}".format((ld_p_time + lv_p_time + as_p_time), average_slope))
 
-        marked_img = self.line_point_detection(cv2_img)
+        marked_img, lpd_p_time = self.line_point_detection(cv2_img)
+
+        print(lpd_p_time)
 
         cv2.imshow("image", marked_img)
         cv2.waitKey(1)
