@@ -108,17 +108,15 @@ class Line_follower:
                     r_white_px = idx
                     break
 
-            # assume equal lane width if the left or right lane is not detected
-            # l_white_px = r_white_px if not l_white_px and r_white_px else l_white_px
-            # r_white_px = l_white_px if not r_white_px and l_white_px else r_white_px
-
             # calculate the mid-point
             if l_white_px and r_white_px:    
                 point[0] = ((point[0] - l_white_px) + (point[0] + r_white_px)) // 2
-            elif l_white_px:
-                point[0] = point[0] + l_white_px
+            elif l_white_px:    # assume the left and right lanes are the same distance from the center point if we only have info about one lane
+                r_white_px = l_white_px
+                point[0] = ((point[0] - l_white_px) + (point[0] + r_white_px)) // 2
             elif r_white_px:
-                point[0] = point[0] - r_white_px
+                l_white_px = r_white_px
+                point[0] = ((point[0] - l_white_px) + (point[0] + r_white_px)) // 2
             else:
                 point[0] = path[path_idx - 1][0] if path_idx > 1 and path_idx != len(path) else point[0]
 
