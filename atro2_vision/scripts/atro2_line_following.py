@@ -23,8 +23,8 @@ class Line_follower:
         
         self._low_blue = np.array([60, 70, 0])
         self._high_blue = np.array([207, 161, 146])
-        self._k_width = 5
-        self._k_height = 5
+        self._k_width = 3
+        self._k_height = 3
         self._threshold1 = 80
         self._threshold2 = 85
 
@@ -62,6 +62,8 @@ class Line_follower:
 
     def line_point_detection(self, image):
         s_time = monotonic()
+        # blur the image to get rid of noise
+        image = cv2.GaussianBlur(image, (self._k_width, self._k_height), 6)
         # Mask the image to isolate the tape
         low_blue = np.array([60, 70, 0])
         high_blue = np.array([207, 161, 146])
