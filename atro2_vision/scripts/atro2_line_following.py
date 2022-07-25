@@ -62,7 +62,7 @@ class Line_follower:
 
     def line_point_detection(self, image):
         s_time = monotonic()
-        # blur the image to get rid of noise
+        # blur the image to include more tape in the mask
         image = cv2.GaussianBlur(image, (self._k_width, self._k_height), 6)
         # Mask the image to isolate the tape
         low_blue = np.array([60, 70, 0])
