@@ -23,3 +23,8 @@
             std_msgs  # Or other packages containing msgs
             sensor_msgs
         )
+
+- When importing custom python scripts, make sure the following is done:
+    - A setup script is created in the package directory to point to where all the scripts to be installed are located.
+    - The <catkin_python_setup> function is called in the CMakeLists file
+    - The python files are defined in the catkin_python_install function with the parent folder's path. i.e. /scripts/pythonfile.py
