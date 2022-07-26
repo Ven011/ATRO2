@@ -6,7 +6,6 @@
 
 from time import monotonic
 import cv2
-from matplotlib import image
 import numpy as np
 import math
 
