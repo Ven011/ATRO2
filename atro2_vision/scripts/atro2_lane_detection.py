@@ -15,7 +15,7 @@ class Lane_detector:
 
     def prep_image(self, image, interest_region: list):
         # resize the image
-        image = cv2.resize(image, (800, 800))
+        #image = cv2.resize(image, (800, 800))
         img_h = image.shape[0]
         img_w = image.shape[1]
         # crop the image based on the interest region
@@ -81,7 +81,7 @@ class Lane_detector:
                                                                             # could not be found
             lane_resolution_c += 1
 
-        cv2.imshow("mask", mask)
+        #cv2.imshow("mask", mask)
 
         return l_lane_l, l_lane_r, r_lane_l, r_lane_r
 

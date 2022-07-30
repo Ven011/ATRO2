@@ -50,7 +50,7 @@ def main():
             img_h = img.shape[0]
             
             # run the lane detector and retrieve the path
-            path = ld.run(img, interest_region=[0, img_h], lane_resolution=1)
+            path = ld.run(img, interest_region=[0, img_h], lane_resolution=5)
         except rospy.ServiceException:
             print("Service call failed")
 
