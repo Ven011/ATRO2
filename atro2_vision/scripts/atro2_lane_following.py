@@ -5,6 +5,7 @@
     a lane of tape. 
 """
 
+from time import monotonic
 import rospy
 import cv2
 import math
@@ -29,22 +30,34 @@ class lane_follower:
         self.cmd_msg = String()
 
         # setup timer
-        self.curr_time = 0
+        self.curr_time = monotonic()
+
+        self.turn_freq_gain = 1
 
     def run(self):
         while not rospy.is_shutdown():
-            print("p_time: {}   duty: {}".format(self.path_p_time, self.get_duty_cycle(self.path_heading)))
+            # depending on the turn frequency and turn direction, publish the appropriate control message
+            turn_freq = self.get_frequency()
+            if monotonic() - self.curr_time >= turn_freq * self.turn_freq_gain:
+                if turn_freq > 0:
+                    self.cmd_msg.data = "r"
+                elif turn_freq < 0:
+                    self.cmd_msg.data = "l"
+                self.cmd_pub.publish(self.cmd_msg)
+            else:
+                self.cmd_msg.data = "f"
+                self.cmd_pub.publish(self.cmd_msg)
 
-    def get_duty_cycle(self, heading):
-        # turn heading to movement duty cycle
-        # if heading / path slope is large (almost vertical) the turn duty cycle will be low
-        # if the heading is small (almost horizontal) the turn duty cycle will be high
+    def get_frequency(self):
+        # turn heading into a frequency value
+        # if heading / path slope is large (almost vertical) the turning frequency will be low
+        # if the heading is small (almost horizontal) the turning frequency will be high
         # The direction to turn is determined by the sign of the heading and is preserved after
         # the calculation
-        duty = 0    # signify that no valid heading has been received
-        if heading:
-            duty = 1 / heading
-        return duty
+        freq = 0    # signify that no valid heading has been received
+        if self.path_heading:
+            freq = 1 / self.path_heading
+        return freq
 
     def lane_sub_clb(self, msg):
         self.path_p_time = msg.processing_time
