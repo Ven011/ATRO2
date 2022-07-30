@@ -39,6 +39,7 @@ class lane_follower:
             # depending on the turn frequency and turn direction, publish the appropriate control message
             turn_freq = self.get_frequency()
             if monotonic() - self.curr_time >= turn_freq * self.turn_freq_gain:
+                self.curr_time = monotonic()
                 if turn_freq > 0:
                     self.cmd_msg.data = "r"
                 elif turn_freq < 0:
