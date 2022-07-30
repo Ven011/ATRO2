@@ -48,12 +48,11 @@ catkin_python_setup()
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+# Generate messages in the 'msg' folder
+add_message_files(
+  FILES
+  lane.msg
+)
 
 # Generate services in the 'srv' folder
 add_service_files(
@@ -162,7 +161,7 @@ include_directories(
 # Mark executable scripts (Python etc.) for installation
 # in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  scripts/atro2_cam.py scripts/atro2_line_following.py scripts/atro2_lane_detection.py
+  scripts/atro2_cam.py scripts/atro2_lane_following.py scripts/atro2_lane_detection.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

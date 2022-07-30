@@ -4,10 +4,15 @@
     This script is used to precisely distinguish lanes in an image.
 """
 
-from time import monotonic
 import cv2
 import numpy as np
 import math
+import rospy
+import copy
+from cv_bridge import CvBridge
+from atro2_vision.srv import getImage
+from atro2_vision.msg import lane
+from time import monotonic
 
 class Lane_detector:
     def __init__(self):
@@ -194,37 +199,85 @@ class Lane_detector:
 
         return image, path
 
-    def run(self, image, interest_region: list, lane_resolution: int, show_path: bool = True, dispute_severity: int = 50, ownership_range: int = 30):
+    def lane_heading(self, img, path: list, path_range_percent: list, negate_slope: bool = True):
+        if path_range_percent[0] and path_range_percent[1]:
+            # turn percent range into path point indexes
+            top = int(len(path) * path_range_percent[0]) - 1
+            btm = int(len(path) * path_range_percent[1]) - 1
+
+            cv2.circle(img, tuple(path[top]), 1, (0, 0, 255), 2)
+            cv2.circle(img, tuple(path[btm]), 1, (0, 0, 255), 2)
+            cv2.line(img, tuple(path[top]), tuple(path[btm]), (0, 0, 255), 1)
+
+            # find and return the slope btw the two points selected by the range
+            m = 1000    # this will signify a vertical line
+            if (path[btm][0] - path[top][0]):
+                m = (path[btm][1] - path[top][1]) / (path[btm][0] - path[top][0])
+            else:
+                pass
+            return img, -m if negate_slope else m
+        else:
+            raise Exception("path range has to be > 0 and <= 1")
+
+    def run(self, image, interest_region: list, lane_resolution: int, show_path: bool = True, dispute_severity: int = 50, ownership_range: int = 30, path_range_percent: list = [0.6, 0.7]):
         s_time = monotonic()
         img, mask = self.prep_image(image, interest_region=interest_region)
         lll, llr, rll, rlr = self.scan(img, mask, lane_resolution=lane_resolution)
         s_left, s_right = self.skinny_lane(lll=lll, llr=llr, rll=rll, rlr=rlr)
-        c_left, c_right = self.clean_lanes(skinny_left=s_left, skinny_right=s_right, img=img, dispute_severity=50, ownership_range=30)
+        c_left, c_right = self.clean_lanes(skinny_left=s_left, skinny_right=s_right, img=img, dispute_severity=dispute_severity, ownership_range=ownership_range)
         path_img, path = self.get_path(ll=c_left, rl=c_right, image=img)
-        print(monotonic() - s_time)
+        path_with_heading, path_heading = self.lane_heading(img=path_img, path=path, path_range_percent=path_range_percent)
 
         if show_path:
-            cv2.imshow("s_img", path_img)
+            cv2.imshow("s_img", path_with_heading)
             cv2.waitKey(1)
 
-        return path
+        return path, path_heading, (monotonic() - s_time)
 
-# def test():
-#     ld = Lane_detector()
-#     img, mask = ld.prep_image(ld.test_img, interest_region=[80, 720])
-#     lll, llr, rll, rlr = ld.scan(img, mask, lane_resolution=10)
-#     s_left, s_right = ld.skinny_lane(lll=lll, llr=llr, rll=rll, rlr=rlr)
-#     c_left, c_right = ld.clean_lanes(skinny_left=s_left, skinny_right=s_right, img=img, dispute_severity=50, ownership_range=30)
-#     path_img = ld.get_path(ll=c_left, rl=c_right, image=img)
-#     cv2.imshow("s_img", path_img)
-#     cv2.waitKey(0)
+def main():
+    ld = Lane_detector()
+    # create node
+    rospy.init_node("lane_detector")
+    # wait for the get_image service to become available
+    rospy.wait_for_service("/image_srv/get_image")
+    bridge = CvBridge()
 
-# if __name__ == "__main__":
-#     try:
-#         ld = Lane_detector()
-#         ld.run(ld.test_img, interest_region=[80, 720], lane_resolution=1, dispute_severity=50, ownership_range=20)
-#     except KeyboardInterrupt:
-#         pass
+    # publisher for lane path and path heading information
+    path_pub = rospy.Publisher("lane_info", lane, queue_size=1)
+    path_msg = lane()
+
+    while not rospy.is_shutdown():
+        # request an image and show the results after processing
+        try:
+            # create a service call proxy: Its used to make a call to the service
+            srv_call = rospy.ServiceProxy("/image_srv/get_image", getImage)
+            # make a call to the service with the given arguments and take the response
+            srv_resp = srv_call(True)
+            # get the image from the response and show the results after processing
+            img = copy.deepcopy(srv_resp.cap_image)
+            img = bridge.imgmsg_to_cv2(img, "bgr8")
+            img_h = img.shape[0]
+            
+            # run the lane detector and retrieve the path, path heading and total processing time
+            path, path_heading, p_time = ld.run(img, interest_region=[0, img_h], lane_resolution=10, path_range_percent=[0.6, 0.7])
+
+            # publish the path, path heading, and processing time
+            path_msg.processing_time = p_time
+            path_msg.path_heading = path_heading
+            path_msg.path_x = [path[i][0] for i in range(len(path))]
+            path_msg.path_y = [path[i][1] for i in range(len(path))]
+            path_pub.publish(path_msg)
+
+        except rospy.ServiceException:
+            print("Service call failed")
+
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass
 
 
 
