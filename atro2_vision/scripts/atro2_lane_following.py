@@ -32,7 +32,7 @@ class lane_follower:
         # setup timer
         self.curr_time = monotonic()
 
-        self.turn_freq_gain = 1
+        self.turn_freq_gain = 0.5
 
     def run(self):
         while not rospy.is_shutdown():
@@ -57,7 +57,7 @@ class lane_follower:
         # the calculation
         freq = 0    # signify that no valid heading has been received
         if self.path_heading:
-            freq = 1 / self.path_heading
+            freq = self.path_heading
         return freq
 
     def lane_sub_clb(self, msg):
