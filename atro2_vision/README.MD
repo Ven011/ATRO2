@@ -28,3 +28,5 @@
     - A setup script is created in the package directory to point to where all the scripts to be installed are located.
     - The <catkin_python_setup> function is called in the CMakeLists file
     - The python files are defined in the catkin_python_install function with the parent folder's path. i.e. /scripts/pythonfile.py
+
+- ROS only supports 1-dimensional arrays in messages

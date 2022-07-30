@@ -1,4 +1,5 @@
 <launch>
     <node pkg="atro2_vision" type="atro2_cam.py" name="image_srv" output="screen" ></node>
-    <node pkg="atro2_vision" type="atro2_line_following.py" name="line_following" output="screen"></node>
+    <node pkg="atro2_vision" type="atro2_lane_following.py" name="lane_follower" output="screen"></node>
+    <node pkg="atro2_vision" type="atro2_lane_detection.py" name="lane_detector" output="screen"></node>
 </launch>
