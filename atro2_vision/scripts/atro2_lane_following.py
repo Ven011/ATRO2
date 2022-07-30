@@ -38,7 +38,8 @@ class lane_follower:
         while not rospy.is_shutdown():
             # depending on the turn frequency and turn direction, publish the appropriate control message
             turn_freq = self.get_frequency()
-            if monotonic() - self.curr_time >= turn_freq * self.turn_freq_gain:
+            print(turn_freq)
+            if monotonic() - self.curr_time >= abs(turn_freq):
                 self.curr_time = monotonic()
                 if turn_freq > 0:
                     self.cmd_msg.data = "r"
@@ -57,7 +58,7 @@ class lane_follower:
         # the calculation
         freq = 0    # signify that no valid heading has been received
         if self.path_heading:
-            freq = self.path_heading
+            freq = self.path_heading * self.turn_freq_gain
         return freq
 
     def lane_sub_clb(self, msg):
