@@ -32,13 +32,13 @@ class lane_follower:
         # setup timer
         self.curr_time = monotonic()
 
-        self.turn_freq_gain = 0.5
+        self.turn_freq_gain = 0.0001
 
     def run(self):
         while not rospy.is_shutdown():
             # depending on the turn frequency and turn direction, publish the appropriate control message
             turn_freq = self.get_frequency()
-            print(turn_freq)
+            print(abs(turn_freq))
             if monotonic() - self.curr_time >= abs(turn_freq):
                 self.curr_time = monotonic()
                 if turn_freq > 0:
