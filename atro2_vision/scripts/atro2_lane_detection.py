@@ -241,7 +241,7 @@ class Lane_detector:
 
         if show_path:
             cv2.imshow("s_img", path_with_heading)
-            cv2.waitKey(0)
+            cv2.waitKey(1)
 
         return path, path_heading, (monotonic() - s_time)
 
