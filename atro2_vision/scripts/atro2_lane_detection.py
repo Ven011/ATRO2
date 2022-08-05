@@ -85,7 +85,7 @@ class Lane_detector:
                                                                             # could not be found
             lane_resolution_c += 1
 
-        #cv2.imshow("mask", mask)
+        cv2.imshow("mask", mask)
 
         return l_lane_l, l_lane_r, r_lane_l, r_lane_r
 
@@ -96,7 +96,7 @@ class Lane_detector:
 
         return skinny_left, skinny_right
 
-    def clean_lanes(self, img, skinny_left: list, skinny_right: list, dispute_severity: int = 10, ownership_range: int = 20):
+    def clean_lanes(self, img, skinny_left: list, skinny_right: list, dispute_severity: int = 10, ownership_range: int = 20, lane_offset: int = 200):
         # resolve disputes (both lanes claim to own the same point)
 
         # questionable (may not belong in the lane) lane points based on distance relative to other lane points
@@ -172,11 +172,11 @@ class Lane_detector:
 
         # settle disputes. if the lane has clear ownership of points, declare it as the owner
         # if a 'go' is near a 'g', the lane must be a clear owner of the point
-        for idx in range(len(ql_points) - 1, 1, -1):
+        for idx in range(len(ql_points) - 2, 1, -1):
             if ql_points[idx] == 'go' and (ql_points[idx - 1] == 'g' or ql_points[idx + 1] == 'g'):
                 ql_points[idx] = 'g'
 
-        for idx in range(len(qr_points) - 1, 1, -1):
+        for idx in range(len(qr_points) - 2, 1, -1):
             if qr_points[idx] == 'go' and (qr_points[idx - 1] == 'g' or qr_points[idx + 1] == 'g'):
                 qr_points[idx] = 'g'
 
@@ -189,16 +189,15 @@ class Lane_detector:
             if 'o' in ql_points[idx] and qr_points[idx] == 'g':
                 ql_points[idx] = 'x'
 
-        offset = img.shape[0]
         # redraw the lanes. If a lane point was disowned, set the new lane point to be
         # an offset of the other lane's lane point
         for idx in range(len(qr_points)):
             if qr_points[idx] == 'x':
-                skinny_right[idx][0] = skinny_left[idx][0] + offset
+                skinny_right[idx][0] = skinny_left[idx][0] + lane_offset
 
         for idx in range(len(ql_points)):
             if ql_points[idx] == 'x':
-                skinny_left[idx][0] = skinny_right[idx][0] - offset
+                skinny_left[idx][0] = skinny_right[idx][0] - lane_offset
                 
         return skinny_left, skinny_right
 
@@ -231,12 +230,12 @@ class Lane_detector:
         else:
             raise Exception("path range has to be > 0 and <= 1")
 
-    def run(self, image, interest_region: list, lane_resolution: int, show_path: bool = True, dispute_severity: int = 50, ownership_range: int = 30, path_range_percent: list = [0.6, 0.7]):
+    def run(self, image, interest_region: list, lane_resolution: int, show_path: bool = True, dispute_severity: int = 50, ownership_range: int = 30, path_range_percent: list = [0.6, 0.7], lane_offset: int = 100):
         s_time = monotonic()
         img, mask = self.prep_image(image, interest_region=interest_region)
         lll, llr, rll, rlr = self.scan(img, mask, lane_resolution=lane_resolution)
         s_left, s_right = self.skinny_lane(lll=lll, llr=llr, rll=rll, rlr=rlr)
-        c_left, c_right = self.clean_lanes(skinny_left=s_left, skinny_right=s_right, img=img, dispute_severity=dispute_severity, ownership_range=ownership_range)
+        c_left, c_right = self.clean_lanes(skinny_left=s_left, skinny_right=s_right, img=img, dispute_severity=dispute_severity, ownership_range=ownership_range, lane_offset=lane_offset)
         path_img, path = self.get_path(ll=c_left, rl=c_right, image=img)
         path_with_heading, path_heading = self.lane_heading(img=path_img, path=path, path_range_percent=path_range_percent)
 
@@ -276,7 +275,7 @@ def main():
             img_h = img.shape[0]
             
             # run the lane detector and retrieve the path, path heading and total processing time
-            path, path_heading, p_time = ld.run(img, interest_region=[0, img_h], lane_resolution=10, path_range_percent=[0.6, 0.7])
+            path, path_heading, p_time = ld.run(img, interest_region=[0, img_h], lane_resolution=10, path_range_percent=[0.6, 0.7], lane_offset=200)
 
             # publish the path, path heading, and processing time
             path_msg.processing_time = p_time
