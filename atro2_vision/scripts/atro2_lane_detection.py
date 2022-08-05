@@ -16,11 +16,14 @@ from time import monotonic
 
 class Lane_detector:
     def __init__(self):
-        self.test_img = cv2.imread("lane_sample4.jpg")
+        self.test_img = cv2.imread("lane_sample1.jpg")
 
     def prep_image(self, image, interest_region: list):
         # resize the image
+<<<<<<< HEAD
         #image = cv2.resize(image, (800, 800))
+=======
+>>>>>>> e9e51829323018b8b3d2b65394f85c6c519d3b58
         img_h = image.shape[0]
         img_w = image.shape[1]
         # crop the image based on the interest region
@@ -98,13 +101,13 @@ class Lane_detector:
         return skinny_left, skinny_right
 
     def clean_lanes(self, img, skinny_left: list, skinny_right: list, dispute_severity: int = 10, ownership_range: int = 20):
-        # resolve disputes (both lanes have the same point)
-        
+        # resolve disputes (both lanes claim to own the same point)
+
         # questionable (may not belong in the lane) lane points based on distance relative to other lane points
         qr_points = ['g' for _ in range(len(skinny_right))] # g for good
         ql_points = ['g' for _ in range(len(skinny_left))]
 
-        # disputed points - points claimed by the left and right lane
+        # disputed points -- points claimed by the left and right lane
         d_points = [0 for _ in range(len(skinny_right))]
 
         # find the disputed points
@@ -159,16 +162,27 @@ class Lane_detector:
             if d_points[idx]:
                 qr_points[idx] += 'o'    # o for ownership issue
 
+        # For situations where there is only one lane that spans the height of the image
+        # if there is a dispute between the lanes at the lowest point on the image,
+        # settle the dispute by giving a lane the point if the point is on the lane's side of the image
+        # i.e. give the right lane the point if the point is on the right side of the image.
+        # This will be used to settle more disputes with the following settlements
+        if 'o' in qr_points[len(qr_points) - 1] or 'o' in ql_points[len(ql_points) - 1]:
+            img_col_center = img.shape[1]//2
+            if skinny_left[len(skinny_left) - 1][0] < img_col_center:
+                ql_points[len(ql_points) - 1] = ql_points[len(ql_points) - 1].replace("o", "")
+            else:
+                qr_points[len(qr_points) - 1] = qr_points[len(qr_points) - 1].replace("o", "")
+
         # settle disputes. if the lane has clear ownership of points, declare it as the owner
         # if a 'go' is near a 'g', the lane must be a clear owner of the point
-        # iterate each list forwards and backwards: This helps settle disputes when only one lane is visible in the image
-        for idx in range(1, len(qr_points) - 1):
-            if qr_points[idx] == 'go' and (qr_points[idx - 1] == 'g' or qr_points[idx + 1] == 'g'):
-                qr_points[idx] = 'g'
-
-        for idx in range(1, len(ql_points) - 1):
+        for idx in range(len(ql_points) - 1, 1, -1):
             if ql_points[idx] == 'go' and (ql_points[idx - 1] == 'g' or ql_points[idx + 1] == 'g'):
                 ql_points[idx] = 'g'
+
+        for idx in range(len(qr_points) - 1, 1, -1):
+            if qr_points[idx] == 'go' and (qr_points[idx - 1] == 'g' or qr_points[idx + 1] == 'g'):
+                qr_points[idx] = 'g'
 
         # get each lane to disown a point that it claims, yet the other lane has ownership
         for idx in range(len(qr_points)):
@@ -179,14 +193,16 @@ class Lane_detector:
             if 'o' in ql_points[idx] and qr_points[idx] == 'g':
                 ql_points[idx] = 'x'
 
-        # redraw the lanes using the ownership status
+        offset = img.shape[0]
+        # redraw the lanes. If a lane point was disowned, set the new lane point to be
+        # an offset of the other lane's lane point
         for idx in range(len(qr_points)):
             if qr_points[idx] == 'x':
-                skinny_right[idx][0] = img.shape[1] - 1
+                skinny_right[idx][0] = skinny_left[idx][0] + offset
 
         for idx in range(len(ql_points)):
             if ql_points[idx] == 'x':
-                skinny_left[idx][0] = 0
+                skinny_left[idx][0] = skinny_right[idx][0] - offset
                 
         return skinny_left, skinny_right
 
@@ -230,9 +246,14 @@ class Lane_detector:
 
         if show_path:
             cv2.imshow("s_img", path_with_heading)
-            cv2.waitKey(1)
+            cv2.waitKey(0)
 
         return path, path_heading, (monotonic() - s_time)
+
+def test():
+    ld = Lane_detector()
+    # run the lane detector and retrieve the path, path heading and total processing time
+    path, path_heading, p_time = ld.run(ld.test_img, interest_region=[0, 800], lane_resolution=5, path_range_percent=[0.6, 0.7], ownership_range=40, dispute_severity=100)
 
 def main():
     ld = Lane_detector()
@@ -276,6 +297,7 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+        # test()
     except KeyboardInterrupt:
         pass
 
