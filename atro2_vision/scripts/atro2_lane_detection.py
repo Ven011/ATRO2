@@ -20,10 +20,6 @@ class Lane_detector:
 
     def prep_image(self, image, interest_region: list):
         # resize the image
-<<<<<<< HEAD
-        #image = cv2.resize(image, (800, 800))
-=======
->>>>>>> e9e51829323018b8b3d2b65394f85c6c519d3b58
         img_h = image.shape[0]
         img_w = image.shape[1]
         # crop the image based on the interest region
